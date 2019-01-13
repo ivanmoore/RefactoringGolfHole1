@@ -4,12 +4,12 @@ import java.util.*;
 
 import static com.objectmentor.utilities.args.ArgsException.ErrorCode.*;
 
-public class ArgsAfter1 {
+public class ArgsAfter {
     private Map<Character, ArgumentMarshaler> marshalers;
     private Set<Character> argsFound;
     private ListIterator<String> currentArgument;
 
-    public ArgsAfter1(String schema, String[] args) throws ArgsException {
+    public ArgsAfter(String schema, String[] args) throws ArgsException {
         marshalers = new HashMap<Character, ArgumentMarshaler>();
         argsFound = new HashSet<Character>();
 
@@ -27,23 +27,21 @@ public class ArgsAfter1 {
         char elementId = element.charAt(0);
         String elementTail = element.substring(1);
         validateSchemaElementId(elementId);
-        marshalers.put(elementId, argumentMarshaler(elementId, elementTail));
-    }
-
-    private ArgumentMarshaler argumentMarshaler(char elementId, String elementTail) throws ArgsException {
+        ArgumentMarshaler argumentMarshaler;
         if (elementTail.length() == 0) {
-            return new BooleanArgumentMarshaler();
+            argumentMarshaler = new BooleanArgumentMarshaler();
         } else if (elementTail.equals("*")) {
-            return new StringArgumentMarshaler();
+            argumentMarshaler = new StringArgumentMarshaler();
         } else if (elementTail.equals("#")) {
-            return new IntegerArgumentMarshaler();
+            argumentMarshaler = new IntegerArgumentMarshaler();
         } else if (elementTail.equals("##")) {
-            return new DoubleArgumentMarshaler();
+            argumentMarshaler = new DoubleArgumentMarshaler();
         } else if (elementTail.equals("[*]")) {
-            return new StringArrayArgumentMarshaler();
+            argumentMarshaler = new StringArrayArgumentMarshaler();
         } else {
             throw new ArgsException(INVALID_ARGUMENT_FORMAT, elementId, elementTail);
         }
+        marshalers.put(elementId, argumentMarshaler);
     }
 
     private void validateSchemaElementId(char elementId) throws ArgsException {
@@ -52,7 +50,7 @@ public class ArgsAfter1 {
     }
 
     private void parseArgumentStrings(List<String> argsList) throws ArgsException {
-        for (currentArgument = argsList.listIterator(); currentArgument.hasNext();) {
+        for (currentArgument = argsList.listIterator(); currentArgument.hasNext(); ) {
             String argString = currentArgument.next();
             if (argString.startsWith("-")) {
                 parseArgumentCharacters(argString.substring(1));
